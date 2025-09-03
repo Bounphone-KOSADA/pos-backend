@@ -3,8 +3,13 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
+const connectDB = require('./config/database');
+require('dotenv').config();
 
 const app = express();
+
+// Connect to MongoDB
+connectDB();
 
 // Security middleware
 app.use(helmet());
@@ -33,7 +38,25 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// POS API Routes
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/products', require('./routes/products'));
+app.use('/api/customers', require('./routes/customers'));
+app.use('/api/orders', require('./routes/orders'));
+
+// Basic routes
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'POS System API is running!',
+        endpoints: {
+            categories: '/api/categories',
+            products: '/api/products',
+            customers: '/api/customers',
+            orders: '/api/orders'
+        }
+    });
+});
+
 app.get('/api/hello', (req, res) => {
   res.json({
     success: true,
@@ -57,7 +80,8 @@ app.get('/api/hello/world', (req, res) => {
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: 'Connected'
   });
 });
 
